@@ -1,0 +1,2 @@
+# testQtTensorRT
+使用qtcreator来进行tensorrt的sammple配置
