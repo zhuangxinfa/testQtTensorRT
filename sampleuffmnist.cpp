@@ -19,28 +19,34 @@
 //!
 bool SampleUffMNIST::build()
 {
+    //建立一个builder
     auto builder = SampleUniquePtr<nvinfer1::IBuilder>(
         nvinfer1::createInferBuilder(gLogger.getTRTLogger()));
     if (!builder)
     {
         return false;
     }
+    //使用builder建立network
     auto network = SampleUniquePtr<nvinfer1::INetworkDefinition>(builder->createNetwork());
     if (!network)
     {
         return false;
     }
+    //创建一个builder的配置对象
     auto config = SampleUniquePtr<nvinfer1::IBuilderConfig>(builder->createBuilderConfig());
     if (!config)
     {
         return false;
     }
+    //创建一个uffparseer
     auto parser = SampleUniquePtr<nvuffparser::IUffParser>(nvuffparser::createUffParser());
     if (!parser)
     {
         return false;
     }
+    //调用成员方法constructNetwork方法进行创建网络
     constructNetwork(parser, network);
+    //The maximum batch size which can be used at execution time, and also the batch size for which the engine will be optimized.
     builder->setMaxBatchSize(mParams.batchSize);
     config->setMaxWorkspaceSize(16_MiB);
     config->setFlag(BuilderFlag::kGPU_FALLBACK);
@@ -76,6 +82,7 @@ bool SampleUffMNIST::build()
 //!
 //! \param builder Pointer to the engine builder
 //!
+//配置parse的参数后调用parse方法将network填满
 void SampleUffMNIST::constructNetwork(
     SampleUniquePtr<nvuffparser::IUffParser>& parser,
     SampleUniquePtr<nvinfer1::INetworkDefinition>& network)
@@ -89,9 +96,10 @@ void SampleUffMNIST::constructNetwork(
                           nvinfer1::Dims3(1, 28, 28),
                           nvuffparser::UffInputOrder::kNCHW);
     parser->registerOutput(mParams.outputTensorNames[0].c_str());
-
+    //模型的权重的精度kFLOAT=FP32 format
+    //network将被uff parse填满
     parser->parse(mParams.uffFileName.c_str(), *network, nvinfer1::DataType::kFLOAT);
-
+    //如果要求使用int8的推理模型那么
     if (mParams.int8)
     {
         samplesCommon::setAllTensorScales(network.get(), 127.0f, 127.0f);

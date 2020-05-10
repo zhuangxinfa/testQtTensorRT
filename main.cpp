@@ -51,8 +51,8 @@ initializeSampleParams(const samplesCommon::Args& args)
     samplesCommon::UffSampleParams params;
     if (args.dataDirs.empty()) //!< Use default directories if user hasn't provided paths
     {
-        params.dataDirs.push_back("data/mnist/");
-        params.dataDirs.push_back("data/samples/mnist/");
+        params.dataDirs.push_back("/usr/src/tensorrt/data/mnist/");
+        params.dataDirs.push_back("/usr/src/tensorrt/samples/mnist/");
     }
     else //!< Use the data directory provided by the user
     {
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     SampleUffMNIST sample(params);
     gLogInfo << "Building and running a GPU inference engine for Uff MNIST"
              << std::endl;
-
+    //解析模型构建network
     if (!sample.build())
     {
         return gLogger.reportFail(sampleTest);
